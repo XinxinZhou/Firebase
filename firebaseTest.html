@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset = "UTF-8">
+    <script src='https://cdn.firebase.com/js/client/2.0.4/firebase.js'></script>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js'></script>
+  <h1>Hello Firebase</h1>
+  <script>
+  // Create a callback which logs the current auth state
+	function authDataCallback(authData) {
+	  if (authData) {
+		console.log("User " + authData.uid + " is logged in with " + authData.provider);
+	  } else {
+		console.log(authData, "User is logged out");
+	  }
+	}
+
+// Register the callback to be fired every time auth state changes
+  var myDataRef = new Firebase('https://blistering-heat-3955.firebaseio.com/');
+  myDataRef.onAuth(authDataCallback);
+/*
+  myDataRef.on('child_added', function(snapshot) {
+        var message = snapshot.val();
+		console.log(message,snapshot.key());
+		displayChatMessage(message.title, message.content);
+  });
+    
+ function displayChatMessage(name, text) {
+       $('<div/>').text(text).prepend($('<em/>').text(name+': ')).appendTo($('#messagesDiv'));
+       $('#messagesDiv')[0].scrollTop = $('#messagesDiv')[0].scrollHeight;
+      };
+*/  
+	  
+	  //set up my callback?
+	  
+	  function register(){  //为什么jq没法获取密码框，javascript可以？
+	    var username = $('#username').val();
+	    var password = document.getElementById('userpassword').value;
+		console.log(username, password);
+		userobj = {
+			email: username,
+			password: password
+		};
+		myDataRef.createUser(userobj,function(error){
+		  if (!error) {
+		    console.log("Register:"+userobj.email, userobj.password);
+			myDataRef.authWithPassword(userobj, function(error,authData) {
+			  if(error) {
+			    console.log("login failed", error);
+			  } else {
+			    console.log("succeded", authData);
+				myDataRef.onAuth(function(authData){
+				  if(authData) {
+				    console.log("Again: "+authData.uid,authData.provider,authData.password,
+					authData.password.email);
+				    myDataRef.child("users").child(authData.uid).set({
+					  provider: authData.provider,
+					  name:authData.password.email
+					});
+				  }
+				});
+				/*
+				myDataRef.child('users').set(
+				{
+				provider:'email',
+				name: userobj.email
+				});
+				*/
+				console.log("insert OK");
+			  }
+			});
+			
+		  }
+		  else {
+		    console.log(error,"Fail to register: "+userobj.email, userobj.password);
+		  }
+		});
+		
+		
+		
+		function getName(authData) {
+			switch(authData.provider) {
+				case 'password':
+				return authData.password.email;
+				case 'twitter':
+				return authData.twitter.displayName;
+				case 'facebook':
+				return authData.facebook.displayName;
+			}
+		}
+	  }
+	  
+	function doLogin(email, password) {
+    myDataRef.login('password', {
+        email: email,
+        password: password
+    });
+};
+  </script>
+  </script>
+  <body>
+  <div id='messagesDiv'></div>
+    <input type="email" class="form-control" id="username" placeholder="Email" name="email" />
+    <input type="password" class="form-control" id="userpassword" placeholder="Password" name="password" />
+	<button id = 'register' onclick = 'register()'>Register</button>
+  </body>
+</head>
+</html>

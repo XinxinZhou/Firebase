@@ -34,19 +34,35 @@
 	
 	<script>
 //	var global = this;
- //   var id = 0;
+
 	$(document).ready(function(){
 		var myDataRef = new Firebase('https://blistering-heat-3955.firebaseio.com/');
 		console.log("myDataRef",myDataRef);
 		$('#editor').wysiwyg();
-		$('#post').bind('click', postPaper);
+		$('#post').bind('click', postComment);
         //$('#profilephot').bind('click', postPaper);
-        document.getElementById("photo-upload").addEventListener('change',handleFileSelect,false);
-		var id = 0;
-		var onValueChange = function(snapshot) {
-			 id = snapshot.numChildren();			 
+        document.getElementById("photo-upload").addEventListener('change',handleFileSelect,false); 
+		var onValueChange = function(snapshot) {    
+			 id  = snapshot.numChildren();			
+             console.log("firebaseId",id);
+			 id ++;
+		  console.log("helloID",id );
+		  var mydate = new Date();
+		  console.log(mydate.toDateString());		 
+	      myDataRef.child("comment").child(-$('#inputserialnum').val()).child(-id ).set({
+			 author:$('#inputAuthor').val(),
+             tellwho:$('#tellwho').val(),
+             authorIcons:headicons[0],
+			 content:$('#editor').html(),
+			 date:mydate.toDateString(),                
+		   });	
 		 }
-        
+		 
+        function postComment(){
+		  var serialNum= -$('#inputserialnum').val(); 
+          myDataRef.child('comment').child(serialNum).once('value', onValueChange); 
+		}
+		
 		var headicons = [];
         
         function handleFileSelect(evt) {
@@ -57,40 +73,19 @@
                reader.onload = (function(photofile){
                  return function(e) {
                    var span = document.createElement('span');
-                   span.innerHTML = ['<img class="thumb" src="', e.target.result,
+                   span.innerHTML = ['<img class="usericonthumb" src="', e.target.result,
                                     '" title="', escape(photofile.name), '"/>'].join('');
                    document.getElementById('photolist').insertBefore(span,null);
-                   if(headicons.length < 1)
-				     headicons.push(span.innerHTML);  
-				   else 
-				     headicons.push("|"+span.innerHTML);  
+
+				   headicons.push(span.innerHTML);  				   
                  };   
                })(f);
               reader.readAsDataURL(f);
             }
             console.log("headicons",headicons.toString());  
         };
-                
-        myDataRef.child('paper').on('value', onValueChange);
-	    		 
-		function postPaper(){
-		 id++;
-		 console.log("hello");
-		  var mydate = new Date();
-		  console.log(mydate.toDateString());		 
-			 myDataRef.child("paper").child(-id).set({
-			 title:$('#inputTitle').val(),
-			 author:$('#inputAuthor').val(),
-             authorTitle:$('#authorTitle').val(),  
-             authorIcons:headicons.toString(),
-			 content:$('#editor').html(),
-			 date:mydate.toDateString(),                
-			 like:1,
-             read:1
-		   });		   
-          window.location.href = "reviewPaper.html";
-         }
-		});
+    });
+        
 	</script>
 	<script>
   $(function(){
@@ -132,10 +127,6 @@
     window.prettyPrint && prettyPrint();
   });
 </script>
-
-
-
-	
     <title>Ottawa</title>
 	<!-- BOOTSTRAP STYLES-->
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
@@ -167,17 +158,17 @@ font-size: 16px;"> Last access :  &nbsp; <a href="#" class="btn btn-danger squar
                 <nav class="navbar-default navbar-side" role="navigation">
             <div class="sidebar-collapse">
                 <ul class="nav" id="main-menu">
-				    <li class="text-center">
+                    <li class="text-center">
                         <img id="user" src="assets/img/find_user.png" class="user-image img-responsive"/>
-				    </li>
+                    </li>
                     <li>
                         <a  href="reviewPaper.html"><i class="fa fa-table fa-3x"></i> Review Paper</a>
                     </li>
-                    <li>				
-                        <a class="active-menu"  href="#"><i class="fa fa-square-o fa-3x"></i> Insert Paper</a>
+                    <li >
+                        <a  href="insertPaper.html"><i class="fa fa-square-o fa-3x"></i> Insert Paper</a>
                     </li>
-                    <li>				
-                        <a  href="insertComment.html"><i class="fa fa-square-o fa-3x"></i> Insert Comment</a>
+                    <li >
+                        <a  class="active-menu" href="#"><i class="fa fa-square-o fa-3x"></i> Insert Comment</a>
                     </li>
                 </ul>
             </div>
@@ -188,42 +179,35 @@ font-size: 16px;"> Last access :  &nbsp; <a href="#" class="btn btn-danger squar
             <div id="page-inner">
                 <div class="row">
                     <div class="col-md-12">
-                     <h2>Insert Paper</h2>  
-                        <pre class="prettyprint linenums">!!--1.后台输入页面，插入图片请在相应位置使用上传图片按钮，切勿直接复制图片并直接黏贴至文本域中 <br/>!!--2.输入作者信息以及头像不可重复！！<br/>!!--3.作者信息请用 &lt;br/&gt;表示换行,用"="表示结束，最后一位作者末尾请勿加"="<br/>!!--4.作者信息最大行数为4，每行最大长度如下例<br/>!!-- 作者信息例子:<br/>x-ray,网页&平面设计&lt;br/>渥太华大学电子工程系研究生&lt;br/>个人小说作品网:xraynovel.com&lt;br/>个人英语学习网:xrayenglish.com=&lt;br/>XXZ, software-developer&lt;br/>uo_xinxinzhou@163.com&lt;br/>=x-ray,网页&平面设计&lt;br/>渥太华大学电子工程系研究生&lt;br/>个人小说作品网:xraynovel.ca&lt;br/>个人英语学习网:xrayenglish.ca
-                        
-</pre>
-					 <Br>
-                        <h5></h5> 
+                     <h2>Insert Comment</h2>                     
+					 <br/>
                     </div>
                 </div>
 				<div class="row">
-				  <div class="form-group">
-				  <div class="col-md-12">
-				       <label for="inputTitle" class="col-sm-1 control-label">Title</label>
+				  <div class="form-group">		
+                  <div class="col-md-12">
+				   <label for="inputserialnum" class="col-sm-1 control-label">SerialNum</label>
 					   <div class="col-sm-10">
-					     <input type="title" class="form-control" id="inputTitle" placeholder="Please input title" require="required">
+					     <input class="form-control" id="inputserialnum" placeholder="Please input SerialNum" require="required">
+                           <br/>
 					   </div>
-				  </div>
-				 
-				   <div class="col-md-12">
-				   <br>
-				       <label for="inputAuthor" class="col-sm-1 control-label">Author</label>
+				  </div>                        
+				<div class="col-md-12">
+				   <label for="inputAuthor" class="col-sm-1 control-label">Author</label>
 					   <div class="col-sm-10">
 					     <input type="author" class="form-control" id="inputAuthor" placeholder="Please input Author" require="required">
+                           <br/>
 					   </div>
 				  </div>
-                   
-                   <div class="col-md-12">
-				   <br>
-				       <label for="authorTitle" class="col-sm-1 control-label">Author Title</label>
+				<div class="col-md-12">
+				   <label for="tellwho" class="col-sm-1 control-label">TellWho</label>
 					   <div class="col-sm-10">
-					     <input type="author" class="form-control" id="authorTitle" placeholder="Please input Author Title(student, email,etc.)" require="required">
+					     <input  class="form-control" id="tellwho" placeholder="Please input the name you want to tell." require="required">
 					   </div>
-				  </div>
-                      
+				  </div>                          
                 <div class="col-md-12">
 				   <br>
-				       <label for="profilePhoto" class="col-sm-1 control-label">Profile Photo</label>
+				       <label for="photo-upload" class="col-sm-1 control-label">Profile Photo</label>
 					   <div class="col-sm-10">
 					     <input type="file" accept="image/*" capture="camera" id="photo-upload" multiple>
                            <output id="photolist"></output>
@@ -286,8 +270,7 @@ font-size: 16px;"> Last access :  &nbsp; <a href="#" class="btn btn-danger squar
       </div>
       <input type="text" data-edit="inserttext" id="voiceBtn" x-webkit-speech="">
     </div>
-
-    <div id="editor"></div>
+        <div id="editor" style="height:200px;"></div>
 	<hr/>
 		<div class="form-group">
 		<div align="right" class="col-sm-offset-1 col-sm-10">
@@ -341,5 +324,11 @@ font-size: 16px;"> Last access :  &nbsp; <a href="#" class="btn btn-danger squar
     border: 1px solid #000;
     margin: 10px 5px 0 0;
   }
+    #commenteditor{
+      height:300px;
+    }
+    .usericonthumb{
+      height:50px;
+    }
 </style>
 </html>

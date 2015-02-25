@@ -33,22 +33,38 @@
     <script src="assets/js/bootstrap-wysiwyg-master/bootstrap-wysiwyg.js"></script>
 	
 	<script>
-//	var global = this;
- //   var id = 0;
-	$(document).ready(function(){
+	$(document).ready(function(){       
 		var myDataRef = new Firebase('https://blistering-heat-3955.firebaseio.com/');
 		console.log("myDataRef",myDataRef);
 		$('#editor').wysiwyg();
 		$('#post').bind('click', postPaper);
         //$('#profilephot').bind('click', postPaper);
-        document.getElementById("photo-upload").addEventListener('change',handleFileSelect,false);
-		var id = 0;
+        document.getElementById("photo-upload").addEventListener('change',handleFileSelect,false);		
+        var id = 0;
 		var onValueChange = function(snapshot) {
-			 id = snapshot.numChildren();			 
-		 }
-        
-		var headicons = [];
-        
+             var mydate = new Date();
+             var contentString = $('#editor').html();           
+             while(contentString.charAt(contentString.length-1) == ">" ) {
+                contentString = contentString.slice(0,contentString.length-4);              
+             };  
+			 id = snapshot.numChildren();	
+             id++;
+             console.log("snapshot.numChildren()",snapshot.numChildren());
+             myDataRef.child("paper").child(-id).set({
+			 title:$('#inputTitle').val(),
+			 author:$('#inputAuthor').val(),
+             authorTitle:$('#authorTitle').val(),  
+             authorIcons:headicons.toString(),
+			 content:contentString,
+			 date:mydate.toDateString(),                
+			 like:1,
+             read:1
+		   });
+        };                          
+		function postPaper(){
+          myDataRef.child('paper').once('value', onValueChange);         
+        }             
+		var headicons = [];      
         function handleFileSelect(evt) {
           var fs = evt.target.files; 
             console.log(fs);
@@ -69,30 +85,11 @@
               reader.readAsDataURL(f);
             }
             console.log("headicons",headicons.toString());  
-        };
-                
-        myDataRef.child('paper').on('value', onValueChange);
-	    		 
-		function postPaper(){
-		 id++;
-		 console.log("hello");
-		  var mydate = new Date();
-		  console.log(mydate.toDateString());		 
-			 myDataRef.child("paper").child(-id).set({
-			 title:$('#inputTitle').val(),
-			 author:$('#inputAuthor').val(),
-             authorTitle:$('#authorTitle').val(),  
-             authorIcons:headicons.toString(),
-			 content:$('#editor').html(),
-			 date:mydate.toDateString(),                
-			 like:1,
-             read:1
-		   });		   
-          window.location.href = "reviewPaper.html";
-         }
-		});
+        }       
+    });
 	</script>
-	<script>
+    
+<script>
   $(function(){
     function initToolbarBootstrapBindings() {
       var fonts = ['Serif', 'Sans', 'Arial', 'Arial Black', 'Courier', 
